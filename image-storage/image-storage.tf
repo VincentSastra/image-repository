@@ -20,50 +20,58 @@ resource "aws_s3_bucket" "image-bucket" {
   acl    = "private"
 }
 
-// Create the method and integration for the API
-resource "aws_api_gateway_resource" "proxy" {
+// Extract folder & key information from request
+resource "aws_api_gateway_resource" "folder" {
   rest_api_id = var.api_id
   parent_id   = var.api_root_resource_id
-  path_part   = "{field}"
+  path_part   = "{folder}"
 }
 
+resource "aws_api_gateway_resource" "key" {
+  rest_api_id = var.api_id
+  parent_id   = aws_api_gateway_resource.folder.id
+  path_part   = "{key}"
+}
+
+// Create the method and integration for the API
 resource "aws_api_gateway_method" "get-image-method" {
   rest_api_id = var.api_id
-  resource_id = aws_api_gateway_resource.proxy.id
+  resource_id = aws_api_gateway_resource.key.id
 
   http_method   = "GET"
   authorization = "NONE"
 
   request_parameters = {
-    "method.request.path.field" = true
+    "method.request.path.folder" = true
+    "method.request.path.key"    = true
   }
 }
 
 resource "aws_api_gateway_integration" "get-image" {
   rest_api_id             = var.api_id
-  resource_id             = aws_api_gateway_resource.proxy.id
+  resource_id             = aws_api_gateway_resource.key.id
   http_method             = aws_api_gateway_method.get-image-method.http_method
   integration_http_method = aws_api_gateway_method.get-image-method.http_method
 
   type = "AWS"
 
-  uri         = "arn:aws:apigateway:us-east-2:s3:path/${aws_s3_bucket.image-bucket.bucket}/{field}"
+  uri         = "arn:aws:apigateway:us-east-2:s3:path/${aws_s3_bucket.image-bucket.bucket}/{folder}/{key}"
   credentials = aws_iam_role.s3_api_gateway_role.arn
 
   request_parameters = {
-    "integration.request.path.field" = "method.request.path.field"
+    "integration.request.path.folder" = "method.request.path.folder"
+    "integration.request.path.key"    = "method.request.path.key"
   }
 
   depends_on = [
     aws_s3_bucket.image-bucket,
-    aws_api_gateway_resource.proxy
   ]
 }
 
 // Define the method response to specify the Content-Type & Content-Length
 resource "aws_api_gateway_method_response" "c200" {
   rest_api_id = var.api_id
-  resource_id = aws_api_gateway_resource.proxy.id
+  resource_id = aws_api_gateway_resource.key.id
   http_method = aws_api_gateway_method.get-image-method.http_method
   status_code = "200"
 
@@ -72,7 +80,6 @@ resource "aws_api_gateway_method_response" "c200" {
     aws_api_gateway_method.get-image-method
   ]
   response_parameters = {
-    "method.response.header.Timestamp"      = true
     "method.response.header.Content-Length" = true
     "method.response.header.Content-Type"   = true
   }
@@ -84,7 +91,7 @@ resource "aws_api_gateway_method_response" "c200" {
 
 resource "aws_api_gateway_integration_response" "c200" {
   rest_api_id = var.api_id
-  resource_id = aws_api_gateway_resource.proxy.id
+  resource_id = aws_api_gateway_resource.key.id
   http_method = aws_api_gateway_method.get-image-method.http_method
   status_code = aws_api_gateway_method_response.c200.status_code
 
@@ -93,7 +100,6 @@ resource "aws_api_gateway_integration_response" "c200" {
     aws_api_gateway_method.get-image-method
   ]
   response_parameters = {
-    "method.response.header.Timestamp"      = "integration.response.header.Date"
     "method.response.header.Content-Length" = "integration.response.header.Content-Length"
     "method.response.header.Content-Type"   = "integration.response.header.Content-Type"
   }
