@@ -54,3 +54,12 @@ resource "aws_api_gateway_deployment" "production" {
   rest_api_id = aws_api_gateway_rest_api.image-repository-api.id
   stage_name  = "production"
 }
+
+// Creates s3 bucket object and its methods
+module "image-storage" {
+  source = "./image-storage"
+
+  api_execution_arn    = aws_api_gateway_rest_api.image-repository-api.execution_arn
+  api_id               = aws_api_gateway_rest_api.image-repository-api.id
+  api_root_resource_id = aws_api_gateway_rest_api.image-repository-api.root_resource_id
+}
