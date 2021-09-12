@@ -27,7 +27,7 @@ resource "aws_api_gateway_rest_api" "image-repository-api" {
   name = "image-repository-api"
 
   // Make sure API don't compress return value to UTF-8
-  binary_media_types = ["*/*"]
+  binary_media_types = ["*/*.png"]
 }
 
 resource "aws_api_gateway_method_settings" "log_settings" {

@@ -13,3 +13,7 @@ variable "api_root_resource_id" {
 output "integration" {
   value = aws_api_gateway_integration.get-image
 }
+
+output "method" {
+  value = aws_api_gateway_method.get-image-method
+}
