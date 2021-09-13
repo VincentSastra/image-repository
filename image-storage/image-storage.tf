@@ -24,9 +24,8 @@ resource "aws_s3_bucket" "image-bucket" {
 resource "aws_api_gateway_resource" "single" {
   rest_api_id = var.api_id
   parent_id   = var.api_root_resource_id
-  path_part   = "get"
+  path_part   = "item"
 }
-
 
 resource "aws_api_gateway_resource" "single-folder" {
   rest_api_id = var.api_id
@@ -40,8 +39,10 @@ resource "aws_api_gateway_resource" "single-key" {
   path_part   = "{key}"
 }
 
-// Create the method and integration for the API
-resource "aws_api_gateway_method" "get-image-method" {
+/*
+ * GET-IMAGE Integration & Response
+ */
+resource "aws_api_gateway_method" "get-image" {
   rest_api_id = var.api_id
   resource_id = aws_api_gateway_resource.single-key.id
 
@@ -57,8 +58,8 @@ resource "aws_api_gateway_method" "get-image-method" {
 resource "aws_api_gateway_integration" "get-image" {
   rest_api_id             = var.api_id
   resource_id             = aws_api_gateway_resource.single-key.id
-  http_method             = aws_api_gateway_method.get-image-method.http_method
-  integration_http_method = aws_api_gateway_method.get-image-method.http_method
+  http_method             = aws_api_gateway_method.get-image.http_method
+  integration_http_method = aws_api_gateway_method.get-image.http_method
 
   type = "AWS"
 
@@ -69,23 +70,15 @@ resource "aws_api_gateway_integration" "get-image" {
     "integration.request.path.folder" = "method.request.path.folder"
     "integration.request.path.key"    = "method.request.path.key"
   }
-
-  depends_on = [
-    aws_s3_bucket.image-bucket,
-  ]
 }
 
 // Define the method response to specify the Content-Type & Content-Length
-resource "aws_api_gateway_method_response" "c200" {
+resource "aws_api_gateway_method_response" "get-image" {
   rest_api_id = var.api_id
   resource_id = aws_api_gateway_resource.single-key.id
-  http_method = aws_api_gateway_method.get-image-method.http_method
+  http_method = aws_api_gateway_method.get-image.http_method
   status_code = "200"
 
-  depends_on = [
-    aws_api_gateway_integration.get-image,
-    aws_api_gateway_method.get-image-method
-  ]
   response_parameters = merge({
     "method.response.header.Content-Length" = true
     "method.response.header.Content-Type"   = true
@@ -96,21 +89,71 @@ resource "aws_api_gateway_method_response" "c200" {
   }
 }
 
-resource "aws_api_gateway_integration_response" "c200" {
+resource "aws_api_gateway_integration_response" "get-image" {
   rest_api_id = var.api_id
   resource_id = aws_api_gateway_resource.single-key.id
-  http_method = aws_api_gateway_method_response.c200.http_method
+  http_method = aws_api_gateway_method_response.get-image.http_method
   status_code = "200"
 
-  depends_on = [
-    aws_api_gateway_integration.get-image,
-    aws_api_gateway_method.get-image-method
-  ]
   response_parameters = merge({
     "method.response.header.Content-Length" = "integration.response.header.Content-Length"
     "method.response.header.Content-Type"   = "integration.response.header.Content-Type"
   }, local.cors-integration-header)
 }
+
+/*
+ * PUT-IMAGE Integration & Response
+ */
+resource "aws_api_gateway_method" "put-image" {
+  rest_api_id = var.api_id
+  resource_id = aws_api_gateway_resource.single-key.id
+
+  http_method   = "PUT"
+  authorization = "NONE"
+
+  request_parameters = {
+    "method.request.path.folder"         = true
+    "method.request.path.key"            = true
+    "method.request.header.Content-Type" = true
+  }
+}
+
+resource "aws_api_gateway_integration" "put-image" {
+  rest_api_id             = var.api_id
+  resource_id             = aws_api_gateway_resource.single-key.id
+  http_method             = aws_api_gateway_method.put-image.http_method
+  integration_http_method = aws_api_gateway_method.put-image.http_method
+
+  type = "AWS"
+
+  uri         = "arn:aws:apigateway:us-east-2:s3:path/${aws_s3_bucket.image-bucket.bucket}/{folder}/{key}"
+  credentials = aws_iam_role.s3_api_gateway_role.arn
+
+  request_parameters = {
+    "integration.request.path.folder"         = "method.request.path.folder"
+    "integration.request.path.key"            = "method.request.path.key"
+    "integration.request.header.Content-Type" = "method.request.header.Content-Type"
+  }
+}
+
+resource "aws_api_gateway_method_response" "put-image" {
+  rest_api_id = var.api_id
+  resource_id = aws_api_gateway_resource.single-key.id
+  http_method = aws_api_gateway_method.put-image.http_method
+  status_code = "200"
+
+  response_parameters = local.cors-method-header
+}
+
+resource "aws_api_gateway_integration_response" "put-image" {
+  rest_api_id = var.api_id
+  resource_id = aws_api_gateway_resource.single-key.id
+  http_method = aws_api_gateway_method_response.put-image.http_method
+  status_code = "200"
+
+  response_parameters = local.cors-integration-header
+}
+
 
 // Creates the Integration for Getting the folder's content
 // Create the method and integration for the API
@@ -126,7 +169,7 @@ resource "aws_api_gateway_resource" "list-folder" {
   path_part   = "{folder}"
 }
 
-resource "aws_api_gateway_method" "list-folder-method" {
+resource "aws_api_gateway_method" "list-folder" {
   rest_api_id = var.api_id
   resource_id = aws_api_gateway_resource.list-folder.id
 
@@ -138,11 +181,11 @@ resource "aws_api_gateway_method" "list-folder-method" {
   }
 }
 
-resource "aws_api_gateway_integration" "get-folder" {
+resource "aws_api_gateway_integration" "list-folder" {
   rest_api_id             = var.api_id
   resource_id             = aws_api_gateway_resource.list-folder.id
-  http_method             = aws_api_gateway_method.list-folder-method.http_method
-  integration_http_method = aws_api_gateway_method.list-folder-method.http_method
+  http_method             = aws_api_gateway_method.list-folder.http_method
+  integration_http_method = aws_api_gateway_method.list-folder.http_method
 
   type = "AWS"
 
@@ -152,39 +195,25 @@ resource "aws_api_gateway_integration" "get-folder" {
   request_parameters = {
     "integration.request.path.folder" = "method.request.path.folder"
   }
-
-  depends_on = [
-    aws_s3_bucket.image-bucket,
-  ]
 }
 
 // Define the method response to specify the Content-Type & Content-Length
-resource "aws_api_gateway_method_response" "c200-list" {
+resource "aws_api_gateway_method_response" "list-folder" {
   rest_api_id = var.api_id
   resource_id = aws_api_gateway_resource.list-folder.id
-  http_method = aws_api_gateway_method.list-folder-method.http_method
+  http_method = aws_api_gateway_method.list-folder.http_method
   status_code = "200"
 
   response_parameters = local.cors-method-header
-
-  depends_on = [
-    aws_api_gateway_integration.get-image,
-    aws_api_gateway_method.get-image-method
-  ]
 }
 
-resource "aws_api_gateway_integration_response" "c200-list" {
+resource "aws_api_gateway_integration_response" "list-folder" {
   rest_api_id = var.api_id
   resource_id = aws_api_gateway_resource.list-folder.id
-  http_method = aws_api_gateway_method_response.c200-list.http_method
+  http_method = aws_api_gateway_method_response.list-folder.http_method
   status_code = "200"
 
   response_parameters = local.cors-integration-header
-
-  depends_on = [
-    aws_api_gateway_integration.get-image,
-    aws_api_gateway_method.get-image-method
-  ]
 }
 
 // Creates the IAM policy to access the s3 bucket

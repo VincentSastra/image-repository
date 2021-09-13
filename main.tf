@@ -49,7 +49,7 @@ resource "aws_api_gateway_deployment" "production" {
   }
   // Ensure integration are created before deployment
   depends_on = [
-    module.image-storage.integration
+    module.image-storage.dependency
   ]
   rest_api_id = aws_api_gateway_rest_api.image-repository-api.id
   stage_name  = "production"
