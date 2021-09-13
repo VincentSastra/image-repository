@@ -1,5 +1,7 @@
 <script>
-	const apiEndpoint = "https://jfu7to45ji.execute-api.us-east-2.amazonaws.com/production"
+import FileUploadWidget from "./FileUploadWidget.svelte"
+
+	const apiEndpoint = "https://z53n0uy9j0.execute-api.us-east-2.amazonaws.com/production"
 
 	// To do create a user account
 	const userName = "root"
@@ -24,10 +26,10 @@
 
 <div>
 	{#each imageKeyList as imageKey}
-		<img src={`${apiEndpoint}/get/${imageKey}`} alt={imageKey} />
+		<img src={`${apiEndpoint}/item/${imageKey}`} alt={imageKey} />
 	{/each}
 	<button on:click={getImages}>Get Image</button>
-	<button>Upload Image</button>
+	<FileUploadWidget url={apiEndpoint} userName={userName} />
 </div>
 
 <style global lang="postcss">
