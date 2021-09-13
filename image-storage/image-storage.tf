@@ -86,10 +86,10 @@ resource "aws_api_gateway_method_response" "c200" {
     aws_api_gateway_integration.get-image,
     aws_api_gateway_method.get-image-method
   ]
-  response_parameters = {
+  response_parameters = merge({
     "method.response.header.Content-Length" = true
     "method.response.header.Content-Type"   = true
-  }
+  }, local.cors-method-header)
 
   response_models = {
     "application/json" = "Empty"
@@ -106,10 +106,10 @@ resource "aws_api_gateway_integration_response" "c200" {
     aws_api_gateway_integration.get-image,
     aws_api_gateway_method.get-image-method
   ]
-  response_parameters = {
+  response_parameters = merge({
     "method.response.header.Content-Length" = "integration.response.header.Content-Length"
     "method.response.header.Content-Type"   = "integration.response.header.Content-Type"
-  }
+  }, local.cors-integration-header)
 }
 
 // Creates the Integration for Getting the folder's content
@@ -165,6 +165,8 @@ resource "aws_api_gateway_method_response" "c200-list" {
   http_method = aws_api_gateway_method.list-folder-method.http_method
   status_code = "200"
 
+  response_parameters = local.cors-method-header
+
   depends_on = [
     aws_api_gateway_integration.get-image,
     aws_api_gateway_method.get-image-method
@@ -176,6 +178,8 @@ resource "aws_api_gateway_integration_response" "c200-list" {
   resource_id = aws_api_gateway_resource.list-folder.id
   http_method = aws_api_gateway_method_response.c200-list.http_method
   status_code = "200"
+
+  response_parameters = local.cors-integration-header
 
   depends_on = [
     aws_api_gateway_integration.get-image,
