@@ -129,11 +129,11 @@ resource "aws_api_gateway_integration" "put-image" {
   uri         = "arn:aws:apigateway:us-east-2:s3:path/${aws_s3_bucket.image-bucket.bucket}/{folder}/{key}"
   credentials = aws_iam_role.s3_api_gateway_role.arn
 
-  request_parameters = {
+  request_parameters = merge({
     "integration.request.path.folder"         = "method.request.path.folder"
     "integration.request.path.key"            = "method.request.path.key"
     "integration.request.header.Content-Type" = "method.request.header.Content-Type"
-  }
+  }, local.cors-integration-request-header)
 }
 
 resource "aws_api_gateway_method_response" "put-image" {
@@ -154,6 +154,53 @@ resource "aws_api_gateway_integration_response" "put-image" {
   response_parameters = local.cors-integration-header
 }
 
+/*
+ * OPTION-IMAGE Integration & Response
+ */
+resource "aws_api_gateway_method" "option-image" {
+  rest_api_id = var.api_id
+  resource_id = aws_api_gateway_resource.single-key.id
+
+  http_method   = "OPTIONS"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_integration" "option-image" {
+  rest_api_id = var.api_id
+  resource_id = aws_api_gateway_resource.single-key.id
+  http_method = aws_api_gateway_method.option-image.http_method
+
+  type             = "MOCK"
+  content_handling = "CONVERT_TO_TEXT"
+
+  request_parameters = local.cors-integration-request-header
+  request_templates = {
+    "application/json" = jsonencode(
+      {
+        statusCode = 200
+        message    = "OK"
+      }
+    )
+  }
+}
+
+resource "aws_api_gateway_method_response" "option-image" {
+  rest_api_id = var.api_id
+  resource_id = aws_api_gateway_resource.single-key.id
+  http_method = aws_api_gateway_method.option-image.http_method
+  status_code = 200
+
+  response_parameters = local.cors-method-header
+}
+
+resource "aws_api_gateway_integration_response" "option-image" {
+  rest_api_id = var.api_id
+  resource_id = aws_api_gateway_resource.single-key.id
+  http_method = aws_api_gateway_method_response.option-image.http_method
+  status_code = 200
+
+  response_parameters = local.cors-integration-header
+}
 
 // Creates the Integration for Getting the folder's content
 // Create the method and integration for the API
@@ -192,9 +239,9 @@ resource "aws_api_gateway_integration" "list-folder" {
   uri         = "arn:aws:apigateway:us-east-2:s3:path/${aws_s3_bucket.image-bucket.bucket}/?prefix={folder}/"
   credentials = aws_iam_role.s3_api_gateway_role.arn
 
-  request_parameters = {
+  request_parameters = merge({
     "integration.request.path.folder" = "method.request.path.folder"
-  }
+  }, local.cors-integration-request-header)
 }
 
 // Define the method response to specify the Content-Type & Content-Length
