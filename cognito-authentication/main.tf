@@ -22,6 +22,8 @@ provider "aws" {
 resource "aws_cognito_user_pool" "image-repository" {
   name = "image-repository"
 
+  auto_verified_attributes = ["email"]
+
   account_recovery_setting {
     recovery_mechanism {
       name     = "verified_email"
