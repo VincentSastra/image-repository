@@ -1,4 +1,5 @@
 <script>
+import AuthWidget from "./AuthWidget.svelte"
 import FileUploadWidget from "./FileUploadWidget.svelte"
 
 	const apiEndpoint = "https://z53n0uy9j0.execute-api.us-east-2.amazonaws.com/production"
@@ -25,6 +26,7 @@ import FileUploadWidget from "./FileUploadWidget.svelte"
 </script>
 
 <div>
+	<AuthWidget />
 	{#each imageKeyList as imageKey}
 		<img src={`${apiEndpoint}/item/${imageKey}`} alt={imageKey} />
 	{/each}
