@@ -63,3 +63,7 @@ module "image-storage" {
   api_id               = aws_api_gateway_rest_api.image-repository-api.id
   api_root_resource_id = aws_api_gateway_rest_api.image-repository-api.root_resource_id
 }
+
+module "cognito-authentication" {
+  source = "./cognito-authentication"
+}
