@@ -32,6 +32,8 @@ provider "aws" {
 resource "aws_s3_bucket" "image-bucket" {
   bucket = "image-repository-storage-s3-bucket"
   acl    = "private"
+
+  force_destroy = true
 }
 
 // Extract key information from request
