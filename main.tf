@@ -55,6 +55,16 @@ resource "aws_api_gateway_deployment" "production" {
   stage_name  = "production"
 }
 
+resource "aws_api_gateway_authorizer" "image-repository" {
+  name = "image-repository-api-authorizer"
+  rest_api_id = aws_api_gateway_rest_api.image-repository-api.id
+  type = "COGNITO_USER_POOLS"
+
+  provider_arns = [
+    module.cognito-authentication.cognito_arn
+  ]
+}
+
 // Creates s3 bucket object and its methods
 module "image-storage" {
   source = "./image-storage"

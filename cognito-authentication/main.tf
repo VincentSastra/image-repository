@@ -47,3 +47,7 @@ resource "aws_cognito_user_pool_domain" "image-repository" {
   domain       = "vincents-img-repo" // MUST BE UNIQUE
   user_pool_id = aws_cognito_user_pool.image-repository.id
 }
+
+output "cognito_arn" {
+  value = aws_cognito_user_pool.image-repository.arn
+}
