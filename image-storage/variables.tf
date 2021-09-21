@@ -19,7 +19,6 @@ output "dependency" {
     "get-image"    = aws_api_gateway_integration.get-image
     "put-image"    = aws_api_gateway_integration.put-image
     "list-image"   = aws_api_gateway_integration.list-folder
-    "option-image" = aws_api_gateway_integration.option-image
   }
 }
 

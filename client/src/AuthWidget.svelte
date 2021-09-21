@@ -1,11 +1,5 @@
 <script>
-	let user = {}
-	let userSub = {}
-
-	let userName = ""
-	let password = ""
-
-	let accessToken = ""
+	export let accessToken = ""
 
 	let signUp, signIn, signOut, verify
 	
@@ -15,8 +9,8 @@
 		console.log(CognitoUserPool)
 
 		const poolData = {
-			UserPoolId: 'us-east-2_IYLA4zOeT', // Your user pool id here
-			ClientId: 'uenus0g7i21dvsg1c2590e7fb', // Your client id here
+			UserPoolId: 'us-east-2_RG14COKny', // Your user pool id here
+			ClientId: '765qbrtirt4doidqjj92a0bdnn', // Your client id here
 		};
 		const userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData)
 
@@ -45,8 +39,8 @@
 			const cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
 			cognitoUser.authenticateUser(authenticationDetails, {
 				onSuccess: function(result) {
-					console.log(result)
-					accessToken = result.getAccessToken().getJwtToken();
+					console.log(result.idToken)
+					accessToken = result.idToken.jwtToken
 				},
 
 				onFailure: function(err) {
@@ -76,11 +70,6 @@
 <svelte:head>
 	<script src="./amazon-cognito-identity.min.js" on:load={awsOnload}></script>
 </svelte:head>
-	
-{JSON.stringify(user)}
-{userSub}
-{accessToken}
-
 <form on:submit|preventDefault={signUp}>
 	<input>
 	<input type="password">
@@ -108,3 +97,5 @@
 		Log in
 	</button>
 </form>
+
+<button on:click={() => accessToken = ""}>Sign Out</button>

@@ -1,5 +1,5 @@
 <script>
-	export let url, userName
+	export let url, accessToken
 
 	let inputArray = []
 	let inputHTMLElement
@@ -24,9 +24,12 @@
 	{/each}
 	<button on:click={() => inputHTMLElement.click()}>Choose Image</button>
 	<button on:click={() => inputArray.forEach(async item => {
-		const res = await fetch(`${url}/item/${userName}/${item.file.name}`, {
+		const res = await fetch(`${url}/item/${item.file.name}`, {
 			method: 'PUT',
-			body: item.file
+			body: item.file,
+			headers: {
+				Authorization: accessToken
+			}
 		})
 		console.log(res)
 	})}>Upload</button>
