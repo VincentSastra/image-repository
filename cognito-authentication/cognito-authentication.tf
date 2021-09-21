@@ -50,3 +50,11 @@ resource "aws_cognito_user_pool_domain" "image-repository" {
 output "cognito_arn" {
   value = aws_cognito_user_pool.image-repository.arn
 }
+
+output "cognito_client_pool_id" {
+  value = aws_cognito_user_pool_client.image-repository.id
+}
+
+output "cognito_user_pool_id" {
+  value = aws_cognito_user_pool.image-repository.id
+}

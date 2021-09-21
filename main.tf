@@ -82,4 +82,10 @@ module "cognito-authentication" {
 
 module "client" {
   source = "./client"
+
+  env = jsonencode({
+    cognitoClientId = module.cognito-authentication.cognito_client_pool_id
+    cognitoUserPoolId = module.cognito-authentication.cognito_user_pool_id
+    apigatewayEndpoint = aws_api_gateway_deployment.production.invoke_url
+  })
 }
