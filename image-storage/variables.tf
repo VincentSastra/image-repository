@@ -10,6 +10,10 @@ variable "api_root_resource_id" {
   type = string
 }
 
+variable "authorizer_id" {
+  type = string
+}
+
 output "dependency" {
   value = {
     "get-image"    = aws_api_gateway_integration.get-image

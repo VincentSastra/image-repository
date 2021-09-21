@@ -47,7 +47,8 @@ resource "aws_api_gateway_method" "get-image" {
   resource_id = aws_api_gateway_resource.single-key.id
 
   http_method   = "GET"
-  authorization = "NONE"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = var.authorizer_id
 
   request_parameters = {
     "method.request.path.folder" = true
@@ -67,7 +68,7 @@ resource "aws_api_gateway_integration" "get-image" {
   credentials = aws_iam_role.s3_api_gateway_role.arn
 
   request_parameters = {
-    "integration.request.path.folder" = "method.request.path.folder"
+    "integration.request.path.folder" = "context.authorizer.claims.sub"
     "integration.request.path.key"    = "method.request.path.key"
   }
 }
@@ -109,7 +110,8 @@ resource "aws_api_gateway_method" "put-image" {
   resource_id = aws_api_gateway_resource.single-key.id
 
   http_method   = "PUT"
-  authorization = "NONE"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = var.authorizer_id
 
   request_parameters = {
     "method.request.path.folder"         = true
@@ -130,7 +132,7 @@ resource "aws_api_gateway_integration" "put-image" {
   credentials = aws_iam_role.s3_api_gateway_role.arn
 
   request_parameters = merge({
-    "integration.request.path.folder"         = "method.request.path.folder"
+    "integration.request.path.folder"         = "context.authorizer.claims.sub"
     "integration.request.path.key"            = "method.request.path.key"
     "integration.request.header.Content-Type" = "method.request.header.Content-Type"
   }, local.cors-integration-request-header)
@@ -162,7 +164,8 @@ resource "aws_api_gateway_method" "option-image" {
   resource_id = aws_api_gateway_resource.single-key.id
 
   http_method   = "OPTIONS"
-  authorization = "NONE"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = var.authorizer_id
 }
 
 resource "aws_api_gateway_integration" "option-image" {
@@ -221,7 +224,8 @@ resource "aws_api_gateway_method" "list-folder" {
   resource_id = aws_api_gateway_resource.list-folder.id
 
   http_method   = "GET"
-  authorization = "NONE"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = var.authorizer_id
 
   request_parameters = {
     "method.request.path.folder" = true
@@ -240,7 +244,7 @@ resource "aws_api_gateway_integration" "list-folder" {
   credentials = aws_iam_role.s3_api_gateway_role.arn
 
   request_parameters = merge({
-    "integration.request.path.folder" = "method.request.path.folder"
+    "integration.request.path.folder" = "context.authorizer.claims.sub"
   }, local.cors-integration-request-header)
 }
 
