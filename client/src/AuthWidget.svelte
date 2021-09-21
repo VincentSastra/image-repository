@@ -1,5 +1,5 @@
 <script>
-	export let accessToken = ""
+	export let accessToken = "", UserPoolId, ClientId
 
 	let signUp, signIn, signOut, verify
 	
@@ -9,8 +9,8 @@
 		console.log(CognitoUserPool)
 
 		const poolData = {
-			UserPoolId: 'us-east-2_RG14COKny', // Your user pool id here
-			ClientId: '765qbrtirt4doidqjj92a0bdnn', // Your client id here
+			UserPoolId, 
+			ClientId 
 		};
 		const userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData)
 
