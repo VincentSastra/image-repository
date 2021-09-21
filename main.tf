@@ -79,3 +79,7 @@ module "image-storage" {
 module "cognito-authentication" {
   source = "./cognito-authentication"
 }
+
+module "client" {
+  source = "./client"
+}
