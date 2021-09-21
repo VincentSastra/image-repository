@@ -1,4 +1,14 @@
-// Creates the S3 Bucket and integration methods to access it
+/**
+ * Create an S3 Bucket and accompanying paths to access it
+ * 5 Endpoint in total
+ *    - /list OPTIONS
+ *    - /list GET
+ *    - /item/{key} OPTIONS
+ *    - /item/{key} GET
+ *    - /item/{key} PUT
+ *
+ * Also create IAM Policy for the Bucket
+ */
 terraform {
   required_providers {
     aws = {
@@ -24,7 +34,7 @@ resource "aws_s3_bucket" "image-bucket" {
   acl    = "private"
 }
 
-// Extract folder & key information from request
+// Extract key information from request
 resource "aws_api_gateway_resource" "single" {
   rest_api_id = var.api_id
   parent_id   = var.api_root_resource_id
@@ -45,11 +55,13 @@ resource "aws_api_gateway_method" "get-image" {
   resource_id = aws_api_gateway_resource.single-key.id
 
   http_method   = "GET"
+  // Use Cognito pool authorization
   authorization = "COGNITO_USER_POOLS"
   authorizer_id = var.authorizer_id
 
+  // Pass the key the path's `key` parameter to integration
   request_parameters = {
-    "method.request.path.key"    = true
+    "method.request.path.key" = true
   }
 }
 
@@ -61,30 +73,18 @@ resource "aws_api_gateway_integration" "get-image" {
 
   type = "AWS"
 
+  // Get the object from the S3 Bucket
+  // The `key` is from the path parameter
+  // The folder is the user's unique ID from Cognito Authorizer
   uri         = "arn:aws:apigateway:us-east-2:s3:path/${aws_s3_bucket.image-bucket.bucket}/{folder}/{key}"
   credentials = aws_iam_role.s3_api_gateway_role.arn
 
+  // Get the `folder` and `key` value as well as
+  // pass the CORS headers down to the response
   request_parameters = merge ({
     "integration.request.path.folder" = "context.authorizer.claims.sub"
     "integration.request.path.key"    = "method.request.path.key"
-  }, local.cors-integration-request-header)
-}
-
-// Define the method response to specify the Content-Type & Content-Length
-resource "aws_api_gateway_method_response" "get-image" {
-  rest_api_id = var.api_id
-  resource_id = aws_api_gateway_resource.single-key.id
-  http_method = aws_api_gateway_method.get-image.http_method
-  status_code = "200"
-
-  response_parameters = merge({
-    "method.response.header.Content-Length" = true
-    "method.response.header.Content-Type"   = true
-  }, local.cors-method-header)
-
-  response_models = {
-    "application/json" = "Empty"
-  }
+  }, local.cors.integration-request-header)
 }
 
 resource "aws_api_gateway_integration_response" "get-image" {
@@ -93,11 +93,44 @@ resource "aws_api_gateway_integration_response" "get-image" {
   http_method = aws_api_gateway_method_response.get-image.http_method
   status_code = "200"
 
+  // Pass these header as well as the CORS down to the Method Response
   response_parameters = merge({
     "method.response.header.Content-Length" = "integration.response.header.Content-Length"
     "method.response.header.Content-Type"   = "integration.response.header.Content-Type"
-  }, local.cors-integration-header)
+  }, local.cors.integration-header)
 }
+
+
+resource "aws_api_gateway_method_response" "get-image" {
+  rest_api_id = var.api_id
+  resource_id = aws_api_gateway_resource.single-key.id
+  http_method = aws_api_gateway_method.get-image.http_method
+  status_code = "200"
+
+  // Pass these headers to the users
+  response_parameters = merge({
+    "method.response.header.Content-Length" = true
+    "method.response.header.Content-Type"   = true
+  }, local.cors.method-header)
+
+  response_models = {
+    "application/json" = "Empty"
+  }
+}
+
+/**
+ *  Create an OPTIONS endpoint so that the browser correctly
+ *  recognize CORS and be able to PUT and Authorize
+ */
+module "image-option" {
+  source = "./cors-option"
+
+  resource_id   = aws_api_gateway_resource.list-folder.id
+  api_id        = var.api_id
+  cors          = local.cors
+}
+
+// Repeat the process for the PUT IMAGE endpoint and LIST IMAGE endpoint
 
 /*
  * PUT-IMAGE Integration & Response
@@ -131,7 +164,7 @@ resource "aws_api_gateway_integration" "put-image" {
     "integration.request.path.folder"         = "context.authorizer.claims.sub"
     "integration.request.path.key"            = "method.request.path.key"
     "integration.request.header.Content-Type" = "method.request.header.Content-Type"
-  }, local.cors-integration-request-header)
+  }, local.cors.integration-request-header)
 }
 
 resource "aws_api_gateway_method_response" "put-image" {
@@ -140,7 +173,7 @@ resource "aws_api_gateway_method_response" "put-image" {
   http_method = aws_api_gateway_method.put-image.http_method
   status_code = "200"
 
-  response_parameters = local.cors-method-header
+  response_parameters = local.cors.method-header
 }
 
 resource "aws_api_gateway_integration_response" "put-image" {
@@ -149,7 +182,7 @@ resource "aws_api_gateway_integration_response" "put-image" {
   http_method = aws_api_gateway_method_response.put-image.http_method
   status_code = "200"
 
-  response_parameters = local.cors-integration-header
+  response_parameters = local.cors.integration-header
 }
 
 module "list-option" {
@@ -157,6 +190,7 @@ module "list-option" {
 
   resource_id   = aws_api_gateway_resource.single-key.id
   api_id        = var.api_id
+  cors          = local.cors
 }
 
 // Creates the Integration for Getting the folder's content
@@ -189,7 +223,7 @@ resource "aws_api_gateway_integration" "list-folder" {
 
   request_parameters = merge({
     "integration.request.path.folder" = "context.authorizer.claims.sub"
-  }, local.cors-integration-request-header)
+  }, local.cors.integration-request-header)
 }
 
 // Define the method response to specify the Content-Type & Content-Length
@@ -199,7 +233,7 @@ resource "aws_api_gateway_method_response" "list-folder" {
   http_method = aws_api_gateway_method.list-folder.http_method
   status_code = "200"
 
-  response_parameters = local.cors-method-header
+  response_parameters = local.cors.method-header
 }
 
 resource "aws_api_gateway_integration_response" "list-folder" {
@@ -208,14 +242,7 @@ resource "aws_api_gateway_integration_response" "list-folder" {
   http_method = aws_api_gateway_method_response.list-folder.http_method
   status_code = "200"
 
-  response_parameters = local.cors-integration-header
-}
-
-module "image-option" {
-  source = "./cors-option"
-
-  resource_id   = aws_api_gateway_resource.list-folder.id
-  api_id        = var.api_id
+  response_parameters = local.cors.integration-header
 }
 
 // Creates the IAM policy to access the s3 bucket

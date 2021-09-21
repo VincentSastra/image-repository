@@ -25,27 +25,29 @@ output "dependency" {
 locals {
   allowed_origin = "'*'"
 
-  cors-method-header = {
-    "method.response.header.Access-Control-Allow-Headers"     = true
-    "method.response.header.Access-Control-Allow-Methods"     = true
-    "method.response.header.Access-Control-Allow-Origin"      = true
-    "method.response.header.Access-Control-Max-Age"           = true
-    "method.response.header.Access-Control-Allow-Credentials" = true
-  }
+  cors = {
+    method-header = {
+      "method.response.header.Access-Control-Allow-Headers"     = true
+      "method.response.header.Access-Control-Allow-Methods"     = true
+      "method.response.header.Access-Control-Allow-Origin"      = true
+      "method.response.header.Access-Control-Max-Age"           = true
+      "method.response.header.Access-Control-Allow-Credentials" = true
+    }
 
-  cors-integration-header = {
-    "method.response.header.Access-Control-Allow-Headers"     = "'Authorization,Content-Type,X-Amz-Date,X-Amz-Security-Token,X-Api-Key'"
-    "method.response.header.Access-Control-Allow-Methods"     = "'GET,PUT,OPTIONS'"
-    "method.response.header.Access-Control-Allow-Origin"      = local.allowed_origin
-    "method.response.header.Access-Control-Max-Age"           = "'7200'"
-    "method.response.header.Access-Control-Allow-Credentials" = "'true'"
-  }
+    integration-header = {
+      "method.response.header.Access-Control-Allow-Headers"     = "'Authorization,Content-Type,X-Amz-Date,X-Amz-Security-Token,X-Api-Key'"
+      "method.response.header.Access-Control-Allow-Methods"     = "'GET,PUT,OPTIONS'"
+      "method.response.header.Access-Control-Allow-Origin"      = local.allowed_origin
+      "method.response.header.Access-Control-Max-Age"           = "'7200'"
+      "method.response.header.Access-Control-Allow-Credentials" = "'true'"
+    }
 
-  cors-integration-request-header = {
-    "integration.request.header.Access-Control-Allow-Headers"     = "'Authorization,Content-Type,X-Amz-Date,X-Amz-Security-Token,X-Api-Key'"
-    "integration.request.header.Access-Control-Allow-Methods"     = "'GET,PUT,OPTIONS'"
-    "integration.request.header.Access-Control-Allow-Origin"      = local.allowed_origin
-    "integration.request.header.Access-Control-Max-Age"           = "'7200'"
-    "integration.request.header.Access-Control-Allow-Credentials" = "'true'"
+    integration-request-header = {
+      "integration.request.header.Access-Control-Allow-Headers"     = "'Authorization,Content-Type,X-Amz-Date,X-Amz-Security-Token,X-Api-Key'"
+      "integration.request.header.Access-Control-Allow-Methods"     = "'GET,PUT,OPTIONS'"
+      "integration.request.header.Access-Control-Allow-Origin"      = local.allowed_origin
+      "integration.request.header.Access-Control-Max-Age"           = "'7200'"
+      "integration.request.header.Access-Control-Allow-Credentials" = "'true'"
+    } 
   }
 }

@@ -1,4 +1,6 @@
-// Creates the S3 Bucket and integration methods to access it
+/*
+ * OPTION Integration & Response
+ */
 terraform {
   required_providers {
     aws = {
@@ -18,15 +20,16 @@ provider "aws" {
   region  = "us-east-2"
 }
 
-/*
- * OPTION Integration & Response
- */
 variable "api_id" {
 	type = string
 }
 
 variable "resource_id" {
 	type = string
+}
+
+variable "cors" {
+  type = any
 }
 
 resource "aws_api_gateway_method" "option-image" {
@@ -45,7 +48,7 @@ resource "aws_api_gateway_integration" "option-image" {
   type             = "MOCK"
   content_handling = "CONVERT_TO_TEXT"
 
-  request_parameters = local.cors-integration-request-header
+  request_parameters = var.cors.integration-request-header
   request_templates = {
     "application/json" = jsonencode(
       {
@@ -62,7 +65,7 @@ resource "aws_api_gateway_method_response" "option-image" {
   http_method = aws_api_gateway_method.option-image.http_method
   status_code = 200
 
-  response_parameters = local.cors-method-header
+  response_parameters = var.cors.method-header
 }
 
 resource "aws_api_gateway_integration_response" "option-image" {
@@ -71,34 +74,5 @@ resource "aws_api_gateway_integration_response" "option-image" {
   http_method = aws_api_gateway_method_response.option-image.http_method
   status_code = 200
 
-  response_parameters = local.cors-integration-header
-}
-
-
-locals {
-  allowed_origin = "'*'"
-
-  cors-method-header = {
-    "method.response.header.Access-Control-Allow-Headers"     = true
-    "method.response.header.Access-Control-Allow-Methods"     = true
-    "method.response.header.Access-Control-Allow-Origin"      = true
-    "method.response.header.Access-Control-Max-Age"           = true
-    "method.response.header.Access-Control-Allow-Credentials" = true
-  }
-
-  cors-integration-header = {
-    "method.response.header.Access-Control-Allow-Headers"     = "'Authorization,Content-Type,X-Amz-Date,X-Amz-Security-Token,X-Api-Key'"
-    "method.response.header.Access-Control-Allow-Methods"     = "'GET,PUT,OPTIONS'"
-    "method.response.header.Access-Control-Allow-Origin"      = local.allowed_origin
-    "method.response.header.Access-Control-Max-Age"           = "'7200'"
-    "method.response.header.Access-Control-Allow-Credentials" = "'true'"
-  }
-
-  cors-integration-request-header = {
-    "integration.request.header.Access-Control-Allow-Headers"     = "'Authorization,Content-Type,X-Amz-Date,X-Amz-Security-Token,X-Api-Key'"
-    "integration.request.header.Access-Control-Allow-Methods"     = "'GET,PUT,OPTIONS'"
-    "integration.request.header.Access-Control-Allow-Origin"      = local.allowed_origin
-    "integration.request.header.Access-Control-Max-Age"           = "'7200'"
-    "integration.request.header.Access-Control-Allow-Credentials" = "'true'"
-  }
+  response_parameters = var.cors.integration-header
 }

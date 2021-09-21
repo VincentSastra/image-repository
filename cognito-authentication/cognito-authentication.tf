@@ -1,5 +1,4 @@
 // Creates the AWS Cognito User Pool
-
 terraform {
   required_providers {
     aws = {
