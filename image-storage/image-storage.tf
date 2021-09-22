@@ -106,7 +106,7 @@ resource "aws_api_gateway_integration_response" "get-image" {
 resource "aws_api_gateway_method_response" "get-image" {
   rest_api_id = var.api_id
   resource_id = aws_api_gateway_resource.single-key.id
-  http_method = aws_api_gateway_method.get-image.http_method
+  http_method = aws_api_gateway_integration.get-image.http_method
   status_code = "200"
 
   // Pass these headers to the users
@@ -172,10 +172,14 @@ resource "aws_api_gateway_integration" "put-image" {
 resource "aws_api_gateway_method_response" "put-image" {
   rest_api_id = var.api_id
   resource_id = aws_api_gateway_resource.single-key.id
-  http_method = aws_api_gateway_method.put-image.http_method
+  http_method = aws_api_gateway_integration.put-image.http_method
   status_code = "200"
 
   response_parameters = local.cors.method-header
+  
+  response_models = {
+    "application/json" = "Empty"
+  }
 }
 
 resource "aws_api_gateway_integration_response" "put-image" {
@@ -232,10 +236,14 @@ resource "aws_api_gateway_integration" "list-folder" {
 resource "aws_api_gateway_method_response" "list-folder" {
   rest_api_id = var.api_id
   resource_id = aws_api_gateway_resource.list-folder.id
-  http_method = aws_api_gateway_method.list-folder.http_method
+  http_method = aws_api_gateway_integration.list-folder.http_method
   status_code = "200"
 
   response_parameters = local.cors.method-header
+
+  response_models = {
+    "application/xml" = "Empty"
+  }
 }
 
 resource "aws_api_gateway_integration_response" "list-folder" {

@@ -62,7 +62,7 @@ resource "aws_api_gateway_integration" "option-image" {
 resource "aws_api_gateway_method_response" "option-image" {
   rest_api_id = var.api_id
   resource_id = var.resource_id
-  http_method = aws_api_gateway_method.option-image.http_method
+  http_method = aws_api_gateway_integration.option-image.http_method
   status_code = 200
 
   response_parameters = var.cors.method-header
