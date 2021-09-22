@@ -71,3 +71,7 @@ resource "aws_s3_bucket_object" "static_files" {
   // MD5 hash of that object.
   etag = each.value.digests.md5
 }
+
+output "website_url" {
+  value = aws_s3_bucket.client-hosting.website_endpoint
+}
