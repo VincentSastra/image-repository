@@ -25,7 +25,7 @@ import PhotoGridComponent from "./PhotoGridComponent.svelte"
 			// Get the key name only, without the first folder
 			// The first folder is the User's URL which will be set by the
 			// Cognito Authorizer
-			.map(key => key.match(/(?<=\/).*/)[0])
+			.map(key => key.match(/[^\/]+$/)[0])
 
 		// Get the images for each imageURL
 		// Use fetch because we need to pass the accessToken and
