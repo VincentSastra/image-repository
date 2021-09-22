@@ -126,7 +126,7 @@
 						<div>Username</div>
 						<input value="example">
 						<div>Password</div>
-						<input type="password" value="123.,21qW">
+						<input type="password" value="HelloW0rld!">
 						<button class="submit-button" type="submit">
 							Log in
 						</button>
