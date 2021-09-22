@@ -1,7 +1,9 @@
 <script>
 	export let baseUrl, accessToken
 
-	let inputArray = []
+	let inputArray = [
+	
+	]
 	let inputHTMLElement
 	
 	function onInputChange(e) {
@@ -18,10 +20,14 @@
 </script>
 
 <div id="app">
-	{#each inputArray as item}
-		<img class="w-16 h-16" src={item.url} alt={item.file.name} />
-		<div>{item.file.name}</div>
-	{/each}
+	<div>
+		{#each inputArray as item}
+			<div>
+				<img class="w-16 h-16" src={item.url} alt={item.file.name} />
+				<div>{item.file.name}</div>
+			</div>
+		{/each}
+	</div>
 	<button on:click={() => inputHTMLElement.click()}>Choose Image</button>
 	<button on:click={() => inputArray.forEach(async item => {
 		const res = await fetch(`${baseUrl}/item/${item.file.name}`, {
