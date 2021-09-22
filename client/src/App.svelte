@@ -18,9 +18,11 @@
 
 <div>
 	{#if env !== null}	
-		<LoginComponent bind:accessToken={accessToken} bind:ClientId={env.cognitoClientId} bind:UserPoolId={env.cognitoUserPoolId} />
-		<ImageGalleryComponent bind:accessToken={accessToken} bind:baseUrl={env.apigatewayEndpoint} />
-		<FileUploadComponent bind:baseUrl={env.apigatewayEndpoint} bind:accessToken={accessToken} />
+		<LoginComponent bind:accessToken={accessToken} ClientId={env.cognitoClientId} UserPoolId={env.cognitoUserPoolId} />
+		{#if accessToken !== ""}
+			<ImageGalleryComponent accessToken={accessToken} baseUrl={env.apigatewayEndpoint} />
+			<FileUploadComponent baseUrl={env.apigatewayEndpoint} accessToken={accessToken} />
+		{/if}
 	{/if}
 </div>
 
@@ -38,11 +40,10 @@
 	:global(button) {
 		transition: all 0.3s ease;
 
-		@apply rounded-none;
+		@apply rounded-none border-black;
 	}
 
 	.standard-button {
-		border: 1px solid black;
 		@apply px-12 py-4 bg-primary hover:bg-white;
 	}
 </style>

@@ -15,7 +15,8 @@
 		};
 		const userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData)
 
-		signUp = async(e) => {
+		signUp = async (e) => {
+			error = ""
 			const dataEmail = {
 				Name: 'email',
 				Value: e.target[2].value,
@@ -39,7 +40,8 @@
 			resendToken = () => cognitoUser.resendConfirmationCode((err) => { error = err } )
 		}
 		
-		signIn = async(e) => {
+		signIn = async (e) => {
+			error = ""
 			const authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails({
 				Username: e.target[0].value, Password: e.target[1].value
 			});
@@ -59,6 +61,7 @@
 		}
 
 		verify = async (e) => {
+			error = ""
 			const userData = {
 				Username:  username,
 				Pool: userPool,
@@ -81,6 +84,7 @@
 <svelte:head>
 	<script src="./amazon-cognito-identity.min.js" on:load={awsOnload}></script>
 </svelte:head>
+
 <div>
 	{#if showModal}
 		<div on:click={() => {showModal = false}} 
@@ -89,8 +93,13 @@
 				{#if content === "signup"}
 					<form on:submit|preventDefault={signUp}>
 						{#if error}
-							<div class="pb-8 text-red">{error.message || JSON.stringify(error)}</div>
+							<div class="text-red">{error.message || JSON.stringify(error)}</div>
 						{/if}
+
+						<div class="py-8 text-lg">
+							<b>Sign up</b> 
+							for an account. A verification email will be sent to your email
+						</div>
 
 						<div>Username</div>
 						<input>
@@ -106,8 +115,13 @@
 				{:else if content === "signin"}
 					<form on:submit|preventDefault={signIn}>
 						{#if error}
-							<div class="pb-8 text-red w-full">{error.message || JSON.stringify(error)}</div>
+							<div class="text-red w-full">{error.message || JSON.stringify(error)}</div>
 						{/if}
+						
+						<div class="py-8 text-lg">
+							<b>Login</b> 
+							use your own account or login with the example credentials
+						</div>
 
 						<div>Username</div>
 						<input value="example">
@@ -120,10 +134,13 @@
 				{:else}	
 					<form on:submit|preventDefault={verify}>
 						{#if error}
-							<div class="pb-8 text-red w-full">{error.message || JSON.stringify(error)}</div>
+							<div class="text-red w-full">{error.message || JSON.stringify(error)}</div>
 						{/if}
-						
-						<div class="m-8">A verication code has been sent to <b>{email}</b></div>
+
+						<div class="py-8 text-lg">
+							<b>Verify</b> 
+							your email by submitting the access token sent to your email
+						</div>
 
 						<div>Verification Code</div>
 						<input>
@@ -147,14 +164,14 @@
 	{:else}
 		<button 
 			class="bg-opacity-0 hover:bg-opacity-100 bg-white p-4 border-t-0 border-b-0 border-black border-r-0"
-			on:click={function() {
+			on:click={() => {
 				showModal = true
 				content = "signin"
 		}}>Login</button>
 
 		<button
 		class="bg-opacity-0 hover:bg-opacity-100 bg-white p-4 border-t-0 border-b-0 border-black"
-		on:click={function() {
+		on:click={() => {
 				showModal = true
 				content = "signup"
 		}}>Sign Up</button>
@@ -162,10 +179,24 @@
 	<div class="bg-secondary rounded-full h-8 w-8 my-auto mx-4">
 
 	</div>
-	<div class="my-auto pr-4">
+	<div class="my-auto pr-4 ">
 		Image Repository
 	</div>
 </div>
+
+{#if accessToken === ""}
+	<div class="pt-40 mb-8 text-center text-4xl">Login or Sign up to use this website</div>
+	<div class="w-full flex justify-center content-center">
+		<button on:click={() => {
+			showModal = true;
+			content = "signin"
+		}} class="standard-button mr-12">Login</button>
+		<button on:click={() => {
+			showModal = true;
+			content = "signup"
+		}} class="standard-button">Sign up</button>
+	</div>
+{/if}
 
 <style global lang="postcss">
 	@tailwind base;
@@ -179,7 +210,6 @@
 		max-width: 350px;
 		box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);	
 	}
-
 	
 	form {
 		display: flex;
@@ -189,17 +219,17 @@
 		justify-content: center;
 		padding: 0px 20%;
 		background-color: #EEEEEE;
+		overflow-y: auto;
 	}
 
-	input {
-		margin-bottom: 2rem;
-		padding: 4px;
+	form > input {
+		@apply mb-5 p-1;
 	}
 
 	.submit-button {
 		padding: 8px;
 		display: flex;
 		justify-content: center;
-		background-color: white;
+		@apply bg-primary hover:bg-white;
 	}
 </style>

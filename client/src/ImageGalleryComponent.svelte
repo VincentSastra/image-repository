@@ -4,14 +4,7 @@ import PhotoGridComponent from "./PhotoGridComponent.svelte"
 	export let baseUrl, accessToken
 
 	// Create the images to be rendered
-	let imageURLList = [
-		"https://picsum.photos/200/300",
-		"https://picsum.photos/200/600",
-		"https://picsum.photos/400/300",
-		"https://picsum.photos/600/300",
-		"https://picsum.photos/300/300",
-		"https://picsum.photos/800/300"
-	]
+	let imageURLList = []
 
 	// Populate the imageURLList array with the image's URLs
 	const getImages = async () => {
