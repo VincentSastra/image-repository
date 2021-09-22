@@ -18,16 +18,20 @@ import PhotoGridComponent from "./PhotoGridComponent.svelte"
 		})
 	};
 
-	const uploadAllPhotos = () => inputArray.forEach(async item => {
-		const res = await fetch(`${baseUrl}/item/${item.file.name}`, {
-			method: 'PUT',
-			body: item.file,
-			headers: {
-				Authorization: accessToken
-			}
+	const uploadAllPhotos = () => {
+		inputArray.forEach(async item => {
+			const res = await fetch(`${baseUrl}/item/${item.file.name}`, {
+				method: 'PUT',
+				body: item.file,
+				headers: {
+					Authorization: accessToken
+				}
+			})
+			console.log(res)
 		})
-		console.log(res)
-	})
+
+		inputArray = []
+	}
 </script>
 
 <div class="bg-primary bg-opacity-30">
@@ -38,20 +42,20 @@ import PhotoGridComponent from "./PhotoGridComponent.svelte"
 		<div class="upload-box rounded-xl">
 			<div class="dashed-box flex content-center flex-col justify-between">
 				{#if  inputArray.length > 0}
-				<PhotoGridComponent 
-				small={true}
-				imageArray={inputArray.map(item => ({url: item.url, name: item.file.name}))}
-				/>
+					<PhotoGridComponent 
+						small={true}
+						imageArray={inputArray.map(item => ({url: item.url, name: item.file.name}))}
+					/>
 				{:else}
-				<div class="mt-32 text-center w-full text-2xl">
-					Select some pictures from your computer
-				</div>
+					<div class="mt-32 text-center w-full text-2xl">
+						Select some pictures from your computer
+					</div>
 				{/if}
 				
 				<div class="flex justify-center my-8">
 					<button class="standard-button" on:click={() => inputHTMLElement.click()}>Choose Image</button>
 					{#if inputArray.length > 0}
-					<button class="standard-button ml-12" on:click={uploadAllPhotos}>Upload</button>
+						<button class="standard-button ml-12" on:click={uploadAllPhotos}>Upload</button>
 					{/if}
 					<input class="hidden" type="file" accept=".jpg, .jpeg, .png" on:change={onInputChange} bind:this={inputHTMLElement} multiple>			
 				</div>
