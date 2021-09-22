@@ -38,6 +38,11 @@
 	:global(button) {
 		transition: all 0.3s ease;
 
-		@apply rounded-none border-black;
+		@apply rounded-none;
+	}
+
+	.standard-button {
+		border: 1px solid black;
+		@apply px-12 py-4 bg-primary hover:bg-white;
 	}
 </style>
