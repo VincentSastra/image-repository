@@ -27,9 +27,13 @@ variable "env" {
   type = string
 }
 
+variable "s3-client-hosting-name" {
+  type = string
+}
+
 // Create the S3 Bucket
 resource "aws_s3_bucket" "client-hosting" {
-  bucket = "image-repository-client-s3-bucket"
+  bucket = var.s3-client-hosting-name
   acl    = "public-read"
 
   website {
@@ -38,12 +42,12 @@ resource "aws_s3_bucket" "client-hosting" {
 }
 
 resource "aws_s3_bucket_object" "file_upload" {
-  bucket 	      = "${aws_s3_bucket.client-hosting.id}"
-  acl			      = "public-read"
-  key    		    = "env.json"
-  content_type 	= "application/json"
-  content 		  = "${var.env}"
-  etag   		    = "${var.env}"
+  bucket       = aws_s3_bucket.client-hosting.id
+  acl          = "public-read"
+  key          = "env.json"
+  content_type = "application/json"
+  content      = var.env
+  etag         = var.env
 }
 
 
@@ -56,10 +60,10 @@ module "template_files" {
 resource "aws_s3_bucket_object" "static_files" {
   for_each = module.template_files.files
 
-  bucket 		    = "${aws_s3_bucket.client-hosting.id}"
-  acl			      = "public-read"
-  key          	= each.key
-  content_type 	= each.value.content_type
+  bucket       = aws_s3_bucket.client-hosting.id
+  acl          = "public-read"
+  key          = each.key
+  content_type = each.value.content_type
 
   // The template_files module guarantees that only one of these two attributes
   // will be set for each file, depending on whether it is an in-memory template

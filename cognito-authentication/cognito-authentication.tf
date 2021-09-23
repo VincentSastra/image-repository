@@ -18,6 +18,10 @@ provider "aws" {
   region  = "us-east-2"
 }
 
+variable "cognito_user_pool_domain" {
+  type = string
+}
+
 resource "aws_cognito_user_pool" "image-repository" {
   name = "image-repository"
 
@@ -43,7 +47,7 @@ resource "aws_cognito_user_pool_client" "image-repository" {
 }
 
 resource "aws_cognito_user_pool_domain" "image-repository" {
-  domain       = "vincents-img-repo" // MUST BE UNIQUE
+  domain       = var.cognito_user_pool_domain
   user_pool_id = aws_cognito_user_pool.image-repository.id
 }
 

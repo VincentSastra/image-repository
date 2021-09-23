@@ -10,15 +10,19 @@ variable "api_root_resource_id" {
   type = string
 }
 
+variable "image-bucket-name" {
+  type = string
+}
+
 variable "authorizer_id" {
   type = string
 }
 
 output "dependency" {
   value = {
-    "get-image"    = aws_api_gateway_integration.get-image
-    "put-image"    = aws_api_gateway_integration.put-image
-    "list-image"   = aws_api_gateway_integration.list-folder
+    "get-image"  = aws_api_gateway_integration.get-image
+    "put-image"  = aws_api_gateway_integration.put-image
+    "list-image" = aws_api_gateway_integration.list-folder
   }
 }
 
@@ -48,6 +52,6 @@ locals {
       "integration.request.header.Access-Control-Allow-Origin"      = local.allowed_origin
       "integration.request.header.Access-Control-Max-Age"           = "'7200'"
       "integration.request.header.Access-Control-Allow-Credentials" = "'true'"
-    } 
+    }
   }
 }

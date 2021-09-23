@@ -28,6 +28,37 @@
   * Go to the client directory `cd client`
   * Install all the NPM dependencies `npm install`
   * Build the code `npm run build`
+* Set default value for your UNIQUE S3 Bucket names and Cognito domain `in main.tf`
+  * Example file will look like this:
+		>variable "cognito_user_pool_domain" {
+		>  type = string
+		>  default = "vincents-img-repo"
+		>}
+		>
+		>variable "s3-image-bucket-name" {
+		>  type = string
+		>  default = "image-repository-storage-s3-bucket"
+		>}
+		>
+		>variable "s3-client-hosting-name" {
+		>  type = string
+		>  default = "image-repository-client-s3-bucket"
+		>}
+		>
+    Note that I use this file as my configuration. 
+    But because every S3 bucket name and cognito domain must be unique, 
+    Terraform will fail if you use tha same one
+
+variable "s3-image-bucket-name" {
+  type = string
+  // default = "unique_bucket_name_for_image_storage"
+}
+
+variable "s3-client-hosting-name" {
+  type = string
+  // default = "unique_bucket_name_for_client_hosting"
+}
+
 * Initialize Terraform by going to the root directory and running `terraform init`
 * Create all the necessary AWS resources `terraform apply`
 * Terraform will output a website url for the website hosted in S3

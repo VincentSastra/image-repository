@@ -30,7 +30,7 @@ provider "aws" {
 
 // Create the S3 Bucket
 resource "aws_s3_bucket" "image-bucket" {
-  bucket = "image-repository-storage-s3-bucket"
+  bucket = var.image-bucket-name
   acl    = "private"
 
   force_destroy = true
@@ -56,7 +56,7 @@ resource "aws_api_gateway_method" "get-image" {
   rest_api_id = var.api_id
   resource_id = aws_api_gateway_resource.single-key.id
 
-  http_method   = "GET"
+  http_method = "GET"
   // Use Cognito pool authorization
   authorization = "COGNITO_USER_POOLS"
   authorizer_id = var.authorizer_id
@@ -83,7 +83,7 @@ resource "aws_api_gateway_integration" "get-image" {
 
   // Get the `folder` and `key` value as well as
   // pass the CORS headers down to the response
-  request_parameters = merge ({
+  request_parameters = merge({
     "integration.request.path.folder" = "context.authorizer.claims.sub"
     "integration.request.path.key"    = "method.request.path.key"
   }, local.cors.integration-request-header)
@@ -127,9 +127,9 @@ resource "aws_api_gateway_method_response" "get-image" {
 module "image-option" {
   source = "./cors-option"
 
-  resource_id   = aws_api_gateway_resource.list-folder.id
-  api_id        = var.api_id
-  cors          = local.cors
+  resource_id = aws_api_gateway_resource.list-folder.id
+  api_id      = var.api_id
+  cors        = local.cors
 }
 
 // Repeat the process for the PUT IMAGE endpoint and LIST IMAGE endpoint
@@ -176,7 +176,7 @@ resource "aws_api_gateway_method_response" "put-image" {
   status_code = "200"
 
   response_parameters = local.cors.method-header
-  
+
   response_models = {
     "application/json" = "Empty"
   }
@@ -194,9 +194,9 @@ resource "aws_api_gateway_integration_response" "put-image" {
 module "list-option" {
   source = "./cors-option"
 
-  resource_id   = aws_api_gateway_resource.single-key.id
-  api_id        = var.api_id
-  cors          = local.cors
+  resource_id = aws_api_gateway_resource.single-key.id
+  api_id      = var.api_id
+  cors        = local.cors
 }
 
 // Creates the Integration for Getting the folder's content

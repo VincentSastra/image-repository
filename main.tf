@@ -56,9 +56,9 @@ resource "aws_api_gateway_deployment" "production" {
 }
 
 resource "aws_api_gateway_authorizer" "image-repository" {
-  name = "image-repository-api-authorizer"
+  name        = "image-repository-api-authorizer"
   rest_api_id = aws_api_gateway_rest_api.image-repository-api.id
-  type = "COGNITO_USER_POOLS"
+  type        = "COGNITO_USER_POOLS"
 
   provider_arns = [
     module.cognito-authentication.cognito_arn
@@ -72,20 +72,25 @@ module "image-storage" {
   api_execution_arn    = aws_api_gateway_rest_api.image-repository-api.execution_arn
   api_id               = aws_api_gateway_rest_api.image-repository-api.id
   api_root_resource_id = aws_api_gateway_rest_api.image-repository-api.root_resource_id
+  image-bucket-name    = var.s3-image-bucket-name
 
   authorizer_id = aws_api_gateway_authorizer.image-repository.id
 }
 
 module "cognito-authentication" {
   source = "./cognito-authentication"
+
+  cognito_user_pool_domain = var.cognito_user_pool_domain
 }
 
 module "client" {
   source = "./client"
 
+  s3-client-hosting-name = var.s3-client-hosting-name
+
   env = jsonencode({
-    cognitoClientId = module.cognito-authentication.cognito_client_pool_id
-    cognitoUserPoolId = module.cognito-authentication.cognito_user_pool_id
+    cognitoClientId    = module.cognito-authentication.cognito_client_pool_id
+    cognitoUserPoolId  = module.cognito-authentication.cognito_user_pool_id
     apigatewayEndpoint = aws_api_gateway_deployment.production.invoke_url
   })
 }
