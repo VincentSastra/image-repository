@@ -50,17 +50,6 @@
   default = "image-repository-client-s3-bucket"
  }
 ```
-
-variable "s3-image-bucket-name" {
-  type = string
-  // default = "unique_bucket_name_for_image_storage"
-}
-
-variable "s3-client-hosting-name" {
-  type = string
-  // default = "unique_bucket_name_for_client_hosting"
-}
-
 * Initialize Terraform by going to the root directory and running `terraform init`
 * Create all the necessary AWS resources `terraform apply`
 * Terraform will output a website url for the website hosted in S3
