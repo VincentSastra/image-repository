@@ -8,7 +8,7 @@
 * Unlimited Size
 
 ## Try it out
-* Website's URL: [image-repository-client-s3-bucket.s3-website.us-east-2.amazonaws.com](image-repository-client-s3-bucket.s3-website.us-east-2.amazonaws.com)
+* Website's URL: [http://image-repository-client-s3-bucket.s3-website.us-east-2.amazonaws.com](http://image-repository-client-s3-bucket.s3-website.us-east-2.amazonaws.com)
 * Example credentials:
   * username: `example`
   * password: `HelloW0rld!
@@ -28,37 +28,28 @@
   * Go to the client directory `cd client`
   * Install all the NPM dependencies `npm install`
   * Build the code `npm run build`
-* Set default value for your UNIQUE S3 Bucket names and Cognito domain `in main.tf`
+* Set default value for your UNIQUE S3 Bucket names and Cognito domain in `./input.tf`
   * Example file will look like this:
-		>variable "cognito_user_pool_domain" {
-		>  type = string
-		>  default = "vincents-img-repo"
-		>}
-		>
-		>variable "s3-image-bucket-name" {
-		>  type = string
-		>  default = "image-repository-storage-s3-bucket"
-		>}
-		>
-		>variable "s3-client-hosting-name" {
-		>  type = string
-		>  default = "image-repository-client-s3-bucket"
-		>}
-		>
-    Note that I use this file as my configuration. 
-    But because every S3 bucket name and cognito domain must be unique, 
-    Terraform will fail if you use tha same one
-
-variable "s3-image-bucket-name" {
+```
+/** Note that I use this file as my configuration. 
+ *  But because every S3 bucket name and cognito domain must be unique, 
+ *  Terraform will fail if you use tha same one
+ */
+ variable "cognito_user_pool_domain" {
   type = string
-  // default = "unique_bucket_name_for_image_storage"
-}
+  default = "vincents-img-repo"
+ }
 
-variable "s3-client-hosting-name" {
+ variable "s3-image-bucket-name" {
   type = string
-  // default = "unique_bucket_name_for_client_hosting"
-}
+  default = "image-repository-storage-s3-bucket"
+ }
 
+ variable "s3-client-hosting-name" {
+  type = string
+  default = "image-repository-client-s3-bucket"
+ }
+```
 * Initialize Terraform by going to the root directory and running `terraform init`
 * Create all the necessary AWS resources `terraform apply`
 * Terraform will output a website url for the website hosted in S3
