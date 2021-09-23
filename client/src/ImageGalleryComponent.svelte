@@ -5,9 +5,12 @@ import PhotoGridComponent from "./PhotoGridComponent.svelte"
 
 	// Create the images to be rendered
 	let imageURLList = []
+	let loading = false
 
 	// Populate the imageURLList array with the image's URLs
 	const getImages = async () => {
+		loading = true
+
 		// Request a list of all images from the user's folder
 		const res = await fetch(`${baseUrl}/list`, {
 			headers: {
@@ -25,7 +28,7 @@ import PhotoGridComponent from "./PhotoGridComponent.svelte"
 			// Get the key name only, without the first folder
 			// The first folder is the User's URL which will be set by the
 			// Cognito Authorizer
-			.map(key => key.match(/[^\/]+$/)[0])
+			.map(key => key.match(/(?<=\/).*/)[0])
 
 		// Get the images for each imageURL
 		// Use fetch because we need to pass the accessToken and
@@ -37,14 +40,22 @@ import PhotoGridComponent from "./PhotoGridComponent.svelte"
 				}
 			})
 			const blob = await res.blob()
-			return URL.createObjectURL(blob)
+			return {url: URL.createObjectURL(blob), name: url.match(/[^\/]+$/)[0]}
 		}))
+		loading = false
 	}
 </script>
 
 <body>
+	{#if loading}
+		<div
+			class="fixed w-full h-full flex justify-center content-center bg-black bg-opacity-10" 
+		>
+			<img class="h-20 w-20 m-auto" src="./tailspin.svg" alt="Loading" />
+		</div>
+	{/if}
 	<PhotoGridComponent 
-		imageArray={imageURLList.map(url => ({url: url, name: url.split("/").slice(-1)[0]}))}
+		imageArray={imageURLList}
 	/>
 	<div class="flex w-full justify-center">
 		<button class="standard-button"
