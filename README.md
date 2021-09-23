@@ -8,7 +8,7 @@
 * Unlimited Size
 
 ## Try it out
-* Website's URL: [image-repository-client-s3-bucket.s3-website.us-east-2.amazonaws.com](image-repository-client-s3-bucket.s3-website.us-east-2.amazonaws.com)
+* Website's URL: [http://image-repository-client-s3-bucket.s3-website.us-east-2.amazonaws.com](http://image-repository-client-s3-bucket.s3-website.us-east-2.amazonaws.com)
 * Example credentials:
   * username: `example`
   * password: `HelloW0rld!
